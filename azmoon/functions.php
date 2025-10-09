@@ -316,58 +316,82 @@ function my_exam_lessons_sources_accordion_qfpe() {
         .source-item {
             margin-bottom: 10px;
             background-color: #FCFCFC;
-            border-radius:12px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             flex-wrap: wrap;
             padding: 12px 12px;
         }
+
         .source-item:last-child {
             border-bottom: none;
         }
+
         .source-item .teacher-info {
             font-size: 0.95rem;
-            color: #555;
+            color: #3D3D3D;
             font-weight: 500;
             white-space: nowrap;
-            width: 20%;
+            width: 35%;
         }
+
         .source-item .source-links {
-            width:80%;
+            width: 65%;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-around;
-            flex-flow:row-reverse;
+            justify-content: space-between;
+            flex-flow: row-reverse;
+            gap: 10px;
+        }
+
+        /* همه آیتم‌های داخل source-links (پلیر، ویدیو، pdf و ...) برابر شوند */
+        .source-item .source-links > * {
+            flex: 1;
+            min-width: 0;
         }
         .source-item .source-link {
-            width:31%;
             text-decoration: none;
             color: #444;
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 8px 0px;
             display: flex;
-            direction:ltr;
             align-items: center;
-            gap:2px;
+            justify-content: center;
+            direction: ltr;
+            gap: 6px;
             transition: background-color 0.2s ease, border-color 0.2s ease;
+            box-sizing: border-box;
         }
+
         .source-item .source-link:hover {
             background-color: #ebebeb;
             border-color: #ccc;
         }
+
         .source-item .source-icon {
             font-family: 'Font Awesome 5 Free', 'Arial', sans-serif;
             font-weight: 900;
             font-size: 1rem;
             color: #666;
         }
+        /* keep icon & text visually balanced */
         .source-item .source-link .source-icon-img {
             width: 20px;
             height: 20px;
         }
+        .teacher-info{
+
+        }
 
         @media (max-width: 768px) {
+
+            .waveform{
+            display: none;
+            }
+            .lesson-content{
+            padding: 0px;
+            }
             .my-accordion {
                 margin: 10px 0;
                 border-radius: 8px;
@@ -389,27 +413,51 @@ function my_exam_lessons_sources_accordion_qfpe() {
                 align-items: flex-start;
                 padding: 10px;
             }
+
             .source-item .teacher-info {
                 width: 100%;
                 text-align: right;
                 margin-bottom: 8px;
             }
+
             .source-item .source-links {
-                direction:ltr;
                 width: 100%;
-                justify-content: space-around;
+                flex-wrap: wrap;
+                justify-content: stretch;
                 flex-flow: row;
                 gap: 8px;
             }
+
+            /* همه آیتم‌ها تمام عرض در موبایل */
+            .source-item .source-links > * {
+                flex: 1 1 100%;
+            }
+
             .source-item .source-link {
-                width: auto;
                 padding: 6px 10px;
                 justify-content: center;
             }
+
             .source-item .source-link .source-text {
                 display: none;
             }
+
+            .audio-player {
+                width: 100%;
+                justify-content: center;
+            }
+            #waveform{
+                display: none;
+            }
+            .btn-playPause img {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            .teacher-info{
+                flex-flow: row wrap;
+            }
         }
+
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -451,9 +499,126 @@ function my_exam_lessons_sources_accordion_qfpe() {
                 });
             });
         });
+    </script><script src="https://unpkg.com/wavesurfer.js"></script>
 
-    </script>
-    <?php
+    <style>
+        .audio-player {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            width: 100%;
+            height: 40px;          /* 🔹 fix total player height */
+            box-sizing: border-box;
+            direction: ltr;
+            overflow: hidden;      /* hide anything taller than 40px */
+        }
+
+        /* play / pause button scaled down to fit height */
+        .btn-playPause {
+            background-color: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            padding: 0px !important;
+        }
+
+
+
+        .btn-playPause img {
+            width: 29px;
+            height: 24px;
+        }
+
+
+        .audio-player .waveform {
+            width: 100%;
+            min-width: 100px;
+            height: 20px;
+            display: block;
+        }
+        /* limit waveform height & make it shrink with container */
+        #waveform {
+            width: 100%;
+            height: 20px;          /* 🔹 smaller waveform area */
+            max-height: 20px;
+        }
+
+        .waveform wave,
+        #waveform > wave {
+            border-radius: 2px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // لیست همه پلیرها
+            const allPlayers = [];
+
+            const voiceLinks = document.querySelectorAll('.voice-link');
+
+            voiceLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    let audioUrl = this.dataset.src || this.getAttribute('href');
+                    if (!audioUrl) return;
+
+                    // ایجاد کانتینر پلیر
+                    const playerContainer = document.createElement('div');
+                    playerContainer.classList.add('audio-player');
+                    playerContainer.innerHTML = `
+                <button class="btn-playPause">
+                    <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/10/375.png" alt="Play">
+                </button>
+                <div class="waveform"></div>
+            `;
+
+                    this.replaceWith(playerContainer);
+
+                    // ساخت wavesurfer جدید
+                    const wavesurfer = WaveSurfer.create({
+                        container: playerContainer.querySelector('.waveform'),
+                        waveColor: '#ff9900',
+                        progressColor: '#ff6600',
+                        height: 20,
+                        responsive: true,
+                        cursorWidth: 0,
+                        barWidth: 2,
+                        barRadius: 10,
+                        barGap: 3,
+                    });
+
+                    wavesurfer.load(audioUrl);
+                    allPlayers.push(wavesurfer); // ذخیره در آرایه برای کنترل بعدی
+
+                    const playBtn = playerContainer.querySelector('.btn-playPause img');
+                    const btnWrapper = playerContainer.querySelector('.btn-playPause');
+
+                    btnWrapper.addEventListener('click', () => {
+                        // قبل از پخش، بقیه پلیرها رو متوقف کن
+                        allPlayers.forEach(p => {
+                            if (p !== wavesurfer && p.isPlaying()) {
+                                p.pause();
+                            }
+                        });
+                        // حالا پلیر فعلی رو پخش/توقف کن
+                        wavesurfer.playPause();
+                    });
+
+                    wavesurfer.on('play', () => {
+                        playBtn.src = 'https://azmoon.tamland.ir/wp-content/uploads/2025/10/Screenshot-2025-10-09-at-8.54.50-PM.png'; // pause icon
+                    });
+
+                    wavesurfer.on('pause', () => {
+                        playBtn.src = 'https://azmoon.tamland.ir/wp-content/uploads/2025/10/375.png'; // play icon
+                    });
+                });
+            });
+        });
+    </script>    <?php
     ob_start();
 
     // Fetch data with original slugs
@@ -511,8 +676,22 @@ function my_exam_lessons_sources_accordion_qfpe() {
                                                         $has_sources = true;
                                                         ?>
                                                         <li class="source-item">
-                                                            <div class="teacher-info">
-                                                                استاد <?php echo esc_html($source['teacher_sources_qfpe']); ?>
+                                                            <div class="teacher-info" style="font-weight: 800;">
+                                                                 <?php echo esc_html($source['teacher_sources_qfpe']); ?>
+                                                                <div class="question-info" style="display: flex; flex-flow: row; font-size: 12px; margin-top: 10px">
+                                                                    تست شماره <?php echo esc_html($source['question_sources_qfpe']);?> آزمون شماره <?php echo esc_html($source['exam_id_sources_qfpe']);?><div style="display: flex; flex-flow: row wrap; padding-right: 3px"> - رشته <?php
+                                                                    echo " ";
+                                                                    if ($source['major_sources_qfpe'] == 'تجربی') {
+                                                                        echo '<div style="color: #FFC965; padding-right: 3px"> تجربی</div>';
+                                                                    }if ($source['major_sources_qfpe'] == 'ریاضی') {
+                                                                        echo '<div style="color: #99BFEC; padding-right: 3px"> ریاضی</div>';
+                                                                    }if ($source['major_sources_qfpe'] == 'انسانی') {
+                                                                        echo '<div style="color: #E93553; padding-right: 3px"> انسانی</div>';
+                                                                    }
+                                                                    echo " </div>";
+                                                                    ?>
+
+                                                                </div>
                                                             </div>
                                                             <div class="source-links">
                                                                 <?php if (!empty($source['voice_sources_qfpe'])) : ?>
@@ -633,10 +812,25 @@ function lessons_learnt_after_test_func_llatt() {
                                                         $has_sources = true;
                                                         ?>
                                                         <li class="source-item">
-                                                            <div class="teacher-info">
-                                                                استاد <?php echo esc_html($source['teacher_sources_llatt']); ?>
-                                                            </div>
-                                                            <div class="source-links">
+                                                            <div class="teacher-info" style="font-weight: 800;">
+                                                                 <?php echo esc_html($source['teacher_sources_llatt']); ?>
+                                                                <div class="question-info" style="display: flex; flex-flow: row; font-size: 12px; margin-top: 10px">
+                                                                    تست شماره <?php echo esc_html($source['question_sources_llatt']);?> آزمون شماره <?php echo esc_html($source['exam_id_sources_llatt']);?><div style="display: flex; flex-flow: row wrap; padding-right: 3px"> - رشته <?php
+                                                                        echo " ";
+                                                                        if ($source['major_sources_llatt'] == 'تجربی') {
+                                                                            echo '<div style="color: #FFC965; padding-right: 3px"> تجربی</div>';
+                                                                        }if ($source['major_sources_llatt'] == 'ریاضی') {
+                                                                            echo '<div style="color: #99BFEC; padding-right: 3px"> ریاضی</div>';
+                                                                        }if ($source['major_sources_llatt'] == 'انسانی') {
+                                                                            echo '<div style="color: #E93553; padding-right: 3px"> انسانی</div>';
+                                                                        }
+                                                                        echo " </div>";
+                                                                        ?>
+
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="source-links">
                                                                 <?php if (!empty($source['voice_sources_llatt'])) : ?>
                                                                     <a href="<?php echo esc_url($source['voice_sources_llatt']); ?>" target="_blank" class="source-link voice-link">
                                                                         <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import.svg" alt="Video Icon" class="source-icon-img">
@@ -757,7 +951,6 @@ function get_static_token($video_name, $video_id) {
         CURLOPT_URL => 'https://api.tamland.ir/api/course/getWpStreamToken/' . esc_html($video_name) . '/' . esc_html($video_id) . '/' . $ip,
         CURLOPT_RETURNTRANSFER => true,
     ));
-
     $response = curl_exec($curl);
     curl_close($curl);
 
@@ -791,7 +984,7 @@ function videoPlayerPopUp_func() {
             // بستن مدال با کلیک روی دکمه
             closeBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
-                modalPlayer.innerHTML = ''; // پاک کردن محتوا
+                modalPlayer.innerHTML = '';
             });
 
             // بستن مدال با کلیک روی پس‌زمینه
@@ -802,7 +995,7 @@ function videoPlayerPopUp_func() {
                 }
             });
 
-            // Event delegation برای همه المان های send-video-data
+            // Event delegation برای همه المان‌های send-video-data
             document.body.addEventListener('click', async (e) => {
                 const el = e.target.closest('.send-video-data');
                 if (!el) return;
@@ -815,22 +1008,48 @@ function videoPlayerPopUp_func() {
                 const aparatCode = el.getAttribute('data-aparat');
 
                 modal.style.display = 'flex';
-                modalPlayer.innerHTML = ''; // پاک کردن محتوای قبلی
+                modalPlayer.innerHTML = '<p style="color:white; text-align:center;">در حال دریافت اطلاعات ویدیو...</p>';
 
                 if (videoName && videoId) {
-                    // اگر نام و شناسه HLS موجود بود → OvenPlayer
-                    const token = await fetch('<?php echo admin_url("admin-ajax.php"); ?>?action=get_video_token&video_name=' + videoName + '&video_id=' + videoId)
-                        .then(res => res.text());
+                    try {
+                        const res = await fetch('<?php echo admin_url("admin-ajax.php"); ?>?action=get_video_token&video_name=' + videoName + '&video_id=' + videoId);
+                        const text = await res.text();
 
-                    modalPlayer.innerHTML = '<div id="player_dynamic"></div>';
-                    OvenPlayer.create('player_dynamic', {
-                        sources: [
-                            { label: '1080', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/1080_' + videoName + '_1.m3u8?auth=' + token },
-                            { label: '720', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/720_' + videoName + '_1.m3u8?auth=' + token },
-                            { label: '480', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/480_' + videoName + '_1.m3u8?auth=' + token },
-                            { label: '360', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/360_' + videoName + '_1.m3u8?auth=' + token }
-                        ]
-                    });
+                        let data;
+                        try {
+                            data = JSON.parse(text);
+                        } catch {
+                            data = text;
+                        }
+
+                        // اگر خطای دسترسی داشتیم
+                        if (typeof data === 'object' && data.exceptionMessage) {
+                            modalPlayer.innerHTML = '<p style="color:#fff; text-align:center; font-size:16px;">' + 'شما دسترسی مورد نیاز برای تماشای این ویدیو را ندارید.' + '</p>';
+                            return;
+                        }
+
+                        // اگر توکن خالی یا اشتباه بود
+                        if (!data || data.trim() === '' || data.includes('error')) {
+                            modalPlayer.innerHTML = '<p style="color:#fff; text-align:center; font-size:16px;">خطا در دریافت ویدیو</p>';
+                            return;
+                        }
+
+                        // نمایش پلیر
+                        modalPlayer.innerHTML = '<div id="player_dynamic"></div>';
+                        OvenPlayer.create('player_dynamic', {
+                            sources: [
+                                { label: '1080', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/1080_' + videoName + '_1.m3u8?auth=' + data },
+                                { label: '720', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/720_' + videoName + '_1.m3u8?auth=' + data },
+                                { label: '480', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/480_' + videoName + '_1.m3u8?auth=' + data },
+                                { label: '360', type: 'hls', file: 'https://stream.tamland.ir/done/' + videoName + '/360_' + videoName + '_1.m3u8?auth=' + data }
+                            ]
+                        });
+
+                    } catch (error) {
+                        modalPlayer.innerHTML = '<p style="color:#fff; text-align:center; font-size:16px;">خطا در دریافت ویدیو</p>';
+                        console.error('Video token error:', error);
+                    }
+
                 } else if (aparatCode) {
                     // اگر فقط کد آپارات موجود بود → iframe
                     modalPlayer.innerHTML = `
