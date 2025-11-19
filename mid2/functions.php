@@ -15,7 +15,7 @@ define('UPLOADS_DIR', site_url().'/wp-content/uploads');
 $secret_key = defined('TAMLAND_PURCHASE_SECTRET_KEY') ? TAMLAND_PURCHASE_SECTRET_KEY : '';
 
  add_theme_support( 'widgets' );
- 
+
 function hello_elementor_child_enqueue_scripts() {
     wp_enqueue_style( 'bootstrap', get_stylesheet_directory_uri(). '/assets/css/bootstrap.min.css' );
     wp_enqueue_style( 'bootstrap-rtl', get_stylesheet_directory_uri(). '/assets/css/bootstrap.rtl.min.css' );
@@ -36,7 +36,7 @@ function hello_elementor_child_enqueue_scripts() {
 	wp_enqueue_script( 'bootstrap', get_stylesheet_directory_uri(). '/assets/js/bootstrap.min.js' , array(), '5.2.0', true );
 	wp_enqueue_script( 'owl-carousel', get_stylesheet_directory_uri(). '/assets/js/owl.carousel.min.js' , array(), '1.0.0', true );
 	wp_enqueue_script( 'kc-fab', get_stylesheet_directory_uri(). '/assets/js/kc.fab.min.js' , array(), '', true );
-	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.6.1', true );
+	wp_enqueue_script( 'java', get_stylesheet_directory_uri(). '/assets/js/java.js' , array(), '1.6.2', true );
 }
 add_action( 'wp_enqueue_scripts', 'hello_elementor_child_enqueue_scripts', 20 );
 
@@ -1250,7 +1250,7 @@ function teachers_course_items_func(){
                 };
             });
         </script>
-            <div class="container multiteacher my-5">
+            <div class="container multiteacher my-5" style="display:none">
                 <li class="multiteacher-courses-items">
                     <div class="row courses-wrapper align-items-start justify-content-center">
                         <div class="row justify-content-center" id="courseRow">
@@ -1342,6 +1342,19 @@ function teachers_course_items_func(){
                                                     <a href="<?php echo $teachers_courses['item-'.$j]['lesson-plan-pdf-file']; ?>" class="d-block btn" style="background:#FE9923CC;color:#fff;border-radius:20px">
                                                         طرح درس
                                                     </a>
+                                                </div>
+                                                <?php endif; ?>
+                                                 <?php if($teachers_courses['item-'.$j]['teacher-aparat-code-teaser'] != ""): ?>
+                                                <div class="col-6 py-1">
+                                                        <div class="col first-class-video-btn" id="<?php echo $teachers_courses['item-'.$j]['teacher-aparat-code-teaser']; ?>">
+                                                            <div class="elementor-widget-container">
+                                                                <a class="w-100 d-block">
+                                                                    <button class="d-block btn w-100" style="background:#B21E1ECC;color:#fff;border-radius:20px">
+                                                                    تیزر معرفی دوره استاد
+                                                                    </button>
+                                                                </a>
+                                                            </div>
+                                                        </div>
                                                 </div>
                                                 <?php endif; ?>
                                                 <?php if($teachers_courses['item-'.$j]['teacher-aparat-code'] != ""): ?>
@@ -1554,6 +1567,8 @@ function teachers_course_items_func(){
                     jQuery("#teacher-"+teacherSelected).click();
                     document.getElementById("teacher-"+teacherSelected).scrollIntoView();
                 }
+                
+                jQuery('.container.multiteacher').fadeIn(500);
             }
         </script>
         <?php
@@ -2079,45 +2094,6 @@ function ads_banner_2nd_func($atts){
 <?php
 }
 
-
-/**
-    * Add Iran mobile format 
-*/
-add_filter( 'gform_phone_formats', 'ir_phone_format', 10, 2 );
-
-function ir_phone_format( $phone_formats ) {
-    $phone_formats['ir'] = array(
-        'label'       => 'شماره موبایل ایران',
-        'mask'        => '',
-        'regex'       => '/09(0[0-9]|1[0-9]|9[0-9]|3[0-9]|2[0-9])-?[0-9]{3}-?[0-9]{4}/',
-        'instruction' => 'شماره وارد شده صحیح نمی‌باشد',
-    );
- 
-    return $phone_formats;
-}
-
-function restrict_numbers_script() {
-    ?>
-    <script type="text/javascript">
-    jQuery(document).ready(function() {
-        function restrictNumbers(input) {
-            const allowedChars = /^[0-9]*$/;
-            if (!allowedChars.test(input.value)) {
-                input.value = input.value.replace(/[^0-9]/g, '');
-            }
-        }
-
-        // Apply the function to input fields with specific IDs
-        jQuery('#input_1_2, #input_3_2, #input_2_2').on('input', function() {
-            restrictNumbers(this);
-        });
-    });
-    </script>
-    <?php
-}
-add_action('wp_footer', 'restrict_numbers_script');
-
-
 function update_view_more_button_url(){
     if(is_singular('teacher')){
         $post_id = get_the_ID();
@@ -2141,6 +2117,7 @@ add_action('wp_footer','update_view_more_button_url');
 
 add_shortcode('add_to_cart_button_course', 'add_to_cart_button_course_func');
 function add_to_cart_button_course_func($atts){
+    global $secret_key;
     $checkout_page_url = 'https://mid1.tamland.ir/course-checkout';
     $post = get_post();
     $item_name = str_replace("|","-",$post->post_title);
@@ -2159,6 +2136,7 @@ function add_to_cart_button_course_func($atts){
         //$price_sale = get_post_meta( $post->ID, 'price_sale_tax', true );
         $region_price = get_post_meta( $post->ID, 'region-price', true );
         $course_id_lms = get_post_meta( $post->ID, 'course-id-lms', true );
+        $is_installment = get_post_meta( $post->ID, 'installments', true );
         if($region_price !=""){
             for( $i = 0; $i < 1; $i++ ){
                 $items[] = array( 'price' => $region_price['item-'.$i]['region-price-tax'], 'text' => $item_name);
@@ -2191,7 +2169,7 @@ function add_to_cart_button_course_func($atts){
             }
         }
     }
-    $token = hash_hmac('sha256', $course_id_lms . '|' . $items[0]["price"], $secret_key);
+    $token = hash_hmac('sha256', $course_id_lms . '|' . trim($items[0]["price"]), $secret_key);
     ?>
     <form method="post" action="<?php echo $checkout_page_url; ?>">
         <?php
@@ -2205,7 +2183,7 @@ function add_to_cart_button_course_func($atts){
             <?php
         }
         ?>
-        <input type="hidden" name="post_id" value="<?php echo $post->ID; ?>">
+        <input type="hidden" name="course_id" value="<?php echo $post->ID; ?>">
         <input type="hidden" name="teacher_course_id" value="<?php echo $teacher_course_id; ?>">
         <input type="hidden" name="course_id_lms" value="<?php echo $course_id_lms; ?>">
         <input type="hidden" name="ref_url_payment" value="<?php the_permalink(); ?>">
@@ -2230,6 +2208,7 @@ function add_to_cart_button_course_func($atts){
             ';
         }
         ?>
+        <input type="hidden" name="installments" value="<?php echo $is_installment; ?>">
         <input type="hidden" name="course_numbers" value="<?php echo count($items); ?>">
         <input type="hidden" name="utm_source" value="<?php echo htmlspecialchars($_GET['utm_source'] ?? ''); ?>">
         <input type="hidden" name="utm_medium" value="<?php echo htmlspecialchars($_GET['utm_medium'] ?? ''); ?>">
@@ -2436,3 +2415,197 @@ function get_related_ad_page_link_func() {
     return esc_url($page_link ?: '#');
 }
 add_shortcode('get_related_ad_link', 'get_related_ad_page_link_func');
+
+// count words of short description of exam
+function count_chars_of_exam_short_desc() {
+    global $post;
+    if ( ! $post ) return 0;
+
+    $field_value = get_post_meta( $post->ID, 'exam-short-desc', true );
+    if ( ! $field_value ) return 0;
+
+    $clean_text = strip_tags( $field_value );
+    $char_count = strlen( trim( $clean_text ) );
+
+    return $char_count;
+}
+add_shortcode( 'exam_short_desc_char_count', 'count_chars_of_exam_short_desc' );
+
+
+
+
+add_filter( 'gform_phone_formats', 'ir_phone_format', 10, 2 );
+function ir_phone_format( $phone_formats ) {
+    $phone_formats['ir'] = array(
+        'label'       => 'شماره موبایل ایران',
+        'mask'        => '',
+        'regex'       => '/^09(0[1-5]|1[0-9]|2[0-2]|3[0-9]|9[0-4])[0-9]{7}$/',
+        'instruction' => 'لطفاً یک شماره موبایل معتبر ۱۱ رقمی وارد کنید (مثال: 09123456789)',
+    );
+ 
+    return $phone_formats;
+}
+
+add_filter( 'gform_field_css_class', 'auto_add_class_to_iran_phone_fields', 10, 3 );
+function auto_add_class_to_iran_phone_fields( $classes, $field, $form ) {
+    if ( $field->type == 'phone' && $field->phoneFormat == 'ir' ) {
+        $classes .= ' gf-iran-phone-auto';
+    }
+    return $classes;
+}
+
+add_action('wp_footer', 'live_phone_formatter_script');
+function live_phone_formatter_script() {
+    if ( ! class_exists('GFCommon') || ! is_callable(array('GFCommon', 'has_form_on_page')) || ! GFCommon::has_form_on_page() ) {
+        return;
+    }
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        $(document).on('input', '.gf-iran-phone-auto input[type="tel"]', function() {
+            const convertPersianToArabicNumbers = (str) => {
+                const persian = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+                const arabic = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+                const english = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+                return str.split('').map(
+                    c => english[persian.indexOf(c)] || english[arabic.indexOf(c)] || c
+                ).join('');
+            };
+            let value = $(this).val();
+            value = convertPersianToArabicNumbers(value);
+            value = value.replace(/[^0-9]/g, '');
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            $(this).val(value);
+        });
+    });
+    </script>
+    <?php
+}
+
+
+
+add_action('wp_footer', 'add_yektanet_script_to_footer');
+function add_yektanet_script_to_footer() {
+    if (is_page('course-checkout')) {
+        ?>
+<script>
+    !function (t, e, n) {
+        t.yektanetAnalyticsObject = n, t[n] = t[n] || function () {
+            t[n].q.push(arguments)
+        }, t[n].q = t[n].q || [];
+        var a = new Date, r = a.getFullYear().toString() + "0" + a.getMonth() + "0" + a.getDate() + "0" + a.getHours(),
+            c = e.getElementsByTagName("script")[0], s = e.createElement("script");
+        s.id = "ua-script-DSLcJKBG"; s.dataset.analyticsobject = n;
+        s.async = 1; s.type = "text/javascript";
+        s.src = "https://cdn.yektanet.com/rg_woebegone/scripts_v3/DSLcJKBG/rg.complete.js?v=" + r, c.parentNode.insertBefore(s, c)
+    }(window, document, "yektanet");
+</script>
+        <?php
+    }
+}
+
+
+
+function my_child_theme_gtm_head_script() {
+    ?>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NSNB5N6K');</script>
+    <?php
+}
+add_action( 'wp_head', 'my_child_theme_gtm_head_script' );
+
+function my_child_theme_gtm_body_noscript() {
+    ?>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NSNB5N6K"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <?php
+}
+add_action( 'wp_body_open', 'my_child_theme_gtm_body_noscript' );
+
+
+
+// ===============================
+// 🔹 دریافت آی‌پی کاربر
+// ===============================
+function get_user_ip_static() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+}
+
+// ===============================
+// 🔹 AJAX برای دریافت توکن ویدیو
+// ===============================
+add_action('wp_ajax_get_oven_token', 'get_oven_token_ajax');
+add_action('wp_ajax_nopriv_get_oven_token', 'get_oven_token_ajax');
+function get_oven_token_ajax() {
+    $video_name = sanitize_text_field($_POST['video_name']);
+    $video_id   = sanitize_text_field($_POST['video_id']);
+
+    if (!$video_name || !$video_id) {
+        wp_send_json_error('invalid');
+    }
+
+    $ip = get_user_ip_static();
+    $url = "https://api.tamland.ir/api/course/getWpStreamToken/{$video_name}/{$video_id}/{$ip}";
+    $response = wp_remote_get($url);
+
+    if (is_wp_error($response)) {
+        wp_send_json_error('curl_error');
+    }
+
+    $token = wp_remote_retrieve_body($response);
+    wp_send_json_success($token);
+}
+
+// ===============================
+// 🔹 شورتکد fsv_player
+// ===============================
+function fsv_player_func($atts) {
+    global $post;
+
+    $video_name  = get_post_meta($post->ID, 'fsv-video-name', true);
+    $video_id    = get_post_meta($post->ID, 'fsv-video-id', true);
+    $aparat_code = get_post_meta($post->ID, 'fsv-aparat-code', true);
+    $thumb       = get_the_post_thumbnail_url($post->ID, 'medium');
+    $unique_id   = 'player_' . uniqid();
+
+    ob_start();
+
+    // 🔹 نمایش thumbnail + overlay در همه حالت‌ها
+    if ((!empty($video_name) && !empty($video_id)) || !empty($aparat_code)) : ?>
+        <div class="lazy-player" id="<?php echo esc_attr($unique_id); ?>"
+             data-video-name="<?php echo esc_attr($video_name); ?>"
+             data-video-id="<?php echo esc_attr($video_id); ?>"
+             data-aparat-code="<?php echo esc_attr($aparat_code); ?>"
+             style="position:relative;max-width:800px;margin:auto;cursor:pointer;">
+            <img src="<?php echo esc_url($thumb ?: 'https://mid2.tamland.ir/wp-content/uploads/2025/11/video-placeholder-1.jpg'); ?>"
+                 style="width:100%;display:block;">
+            <div class="play-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;
+                 background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;
+                 font-size:3em;color:white;"></div>
+        </div>
+    <?php else : ?>
+        <p style="text-align:center;color:#fff;">ویدیو موجود نیست</p>
+    <?php endif;
+
+    return ob_get_clean();
+}
+add_shortcode('fsv_player', 'fsv_player_func');
+
+// ===============================
+// 🔹 بارگذاری اسکریپت JS
+// ===============================
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_script('fsv-player', get_stylesheet_directory_uri() . '/fsv-player.js', ['jquery'], '1.0', true);
+    wp_localize_script('fsv-player', 'fsv_ajax', ['url' => admin_url('admin-ajax.php')]);
+});
