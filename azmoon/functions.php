@@ -387,10 +387,10 @@ function my_exam_lessons_sources_accordion_qfpe() {
         @media (max-width: 768px) {
 
             .waveform{
-            display: none;
+                display: none !important;
             }
             .lesson-content{
-            padding: 0px;
+                padding: 0px;
             }
             .my-accordion {
                 margin: 10px 0;
@@ -677,46 +677,48 @@ function my_exam_lessons_sources_accordion_qfpe() {
                                                         ?>
                                                         <li class="source-item">
                                                             <div class="teacher-info" style="font-weight: 800;">
-                                                                 <?php echo esc_html($source['teacher_sources_qfpe']); ?>
-                                                                <div class="question-info" style="display: flex; flex-flow: row; font-size: 12px; margin-top: 10px">
-                                                                    تست شماره <?php echo esc_html($source['question_sources_qfpe']);?> آزمون شماره <?php echo esc_html($source['exam_id_sources_qfpe']);?><div style="display: flex; flex-flow: row wrap; padding-right: 3px"> - رشته <?php
-                                                                    echo " ";
-                                                                    if ($source['major_sources_qfpe'] == 'تجربی') {
-                                                                        echo '<div style="color: #FFC965; padding-right: 3px"> تجربی</div>';
-                                                                    }if ($source['major_sources_qfpe'] == 'ریاضی') {
-                                                                        echo '<div style="color: #99BFEC; padding-right: 3px"> ریاضی</div>';
-                                                                    }if ($source['major_sources_qfpe'] == 'انسانی') {
-                                                                        echo '<div style="color: #E93553; padding-right: 3px"> انسانی</div>';
-                                                                    }
-                                                                    echo " </div>";
-                                                                    ?>
+                                                                <?php echo esc_html($source['teacher_sources_qfpe']); ?>
+                                                                <div class="question-info" style="display: flex; flex-flow: <?php if(wp_is_mobile()) echo 'column';else echo 'row';?>; font-size: 12px; margin-top: 10px">
+                                                                    تست شماره <?php echo esc_html($source['question_sources_qfpe']);?> آزمون شماره <?php echo esc_html($source['exam_id_sources_qfpe']);?><div style="display: flex; flex-flow: row wrap; padding-right: 3px">
 
+                                                                        <?php if(!wp_is_mobile()) {echo " - رشته ";} else{ echo "رشته ";}?>
+                                                                        <?php
+                                                                        if ($source['major_sources_qfpe'] == 'تجربی') {
+                                                                            echo '<div style="color: #FFC965; padding-right: 3px"> تجربی</div>';
+                                                                        }if ($source['major_sources_qfpe'] == 'ریاضی') {
+                                                                            echo '<div style="color: #99BFEC; padding-right: 3px"> ریاضی</div>';
+                                                                        }if ($source['major_sources_qfpe'] == 'انسانی') {
+                                                                            echo '<div style="color: #E93553; padding-right: 3px"> انسانی</div>';
+                                                                        }
+                                                                        echo " </div>";
+                                                                        ?>
+
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="source-links">
-                                                                <?php if (!empty($source['voice_sources_qfpe'])) : ?>
-                                                                    <a href="<?php echo esc_url($source['voice_sources_qfpe']); ?>" target="_blank" class="source-link voice-link">
-                                                                        <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import.svg" alt="Video Icon" class="source-icon-img">
-                                                                        <span class="source-text">voice</span>
-                                                                    </a>
-                                                                <?php endif; ?>
-                                                                <?php if (!empty($source['video_sources_aparat_qfpe']) || !empty($source['video_sources_name_qfpe'])) : ?>
-                                                                    <a href="javascript:void(0)"
-                                                                       class="source-link video-link send-video-data"
-                                                                       data-aparat="<?php echo esc_attr($source['video_sources_aparat_qfpe']); ?>"
-                                                                       data-name="<?php echo esc_attr($source['video_sources_name_qfpe']); ?>"
-                                                                       data-id="<?php echo esc_attr($source['video_sources_id_qfpe']); ?>">
-                                                                        <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-1.svg" alt="Video Icon" class="source-icon-img">
-                                                                        <span class="source-text">video</span>
-                                                                    </a>
-                                                                <?php endif; ?>
-                                                                <?php if (!empty($source['doc_sources_qfpe'])) : ?>
-                                                                    <a href="<?php echo esc_url($source['doc_sources_qfpe']); ?>" target="_blank" class="source-link pdf-link">
-                                                                        <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-2.svg" alt="Video Icon" class="source-icon-img">
-                                                                        <span class="source-text">PDF</span>
-                                                                    </a>
-                                                                <?php endif; ?>
-                                                            </div>
+                                                                <div class="source-links">
+                                                                    <?php if (!empty($source['voice_sources_qfpe'])) : ?>
+                                                                        <a href="<?php echo esc_url($source['voice_sources_qfpe']); ?>" target="_blank" class="source-link voice-link">
+                                                                            <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import.svg" alt="Video Icon" class="source-icon-img">
+                                                                            <span class="source-text">voice</span>
+                                                                        </a>
+                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($source['video_sources_aparat_qfpe']) || !empty($source['video_sources_name_qfpe'])) : ?>
+                                                                        <a href="javascript:void(0)"
+                                                                           class="source-link video-link send-video-data"
+                                                                           data-aparat="<?php echo esc_attr($source['video_sources_aparat_qfpe']); ?>"
+                                                                           data-name="<?php echo esc_attr($source['video_sources_name_qfpe']); ?>"
+                                                                           data-id="<?php echo esc_attr($source['video_sources_id_qfpe']); ?>">
+                                                                            <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-1.svg" alt="Video Icon" class="source-icon-img">
+                                                                            <span class="source-text">video</span>
+                                                                        </a>
+                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($source['doc_sources_qfpe'])) : ?>
+                                                                        <a href="<?php echo esc_url($source['doc_sources_qfpe']); ?>" target="_blank" class="source-link pdf-link">
+                                                                            <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-2.svg" alt="Video Icon" class="source-icon-img">
+                                                                            <span class="source-text">PDF</span>
+                                                                        </a>
+                                                                    <?php endif; ?>
+                                                                </div>
                                                         </li>
                                                         <?php
                                                     }
@@ -813,9 +815,11 @@ function lessons_learnt_after_test_func_llatt() {
                                                         ?>
                                                         <li class="source-item">
                                                             <div class="teacher-info" style="font-weight: 800;">
-                                                                 <?php echo esc_html($source['teacher_sources_llatt']); ?>
-                                                                <div class="question-info" style="display: flex; flex-flow: row; font-size: 12px; margin-top: 10px">
-                                                                    تست شماره <?php echo esc_html($source['question_sources_llatt']);?> آزمون شماره <?php echo esc_html($source['exam_id_sources_llatt']);?><div style="display: flex; flex-flow: row wrap; padding-right: 3px"> - رشته <?php
+                                                                <?php echo esc_html($source['teacher_sources_llatt']); ?>
+                                                                <div class="question-info" style="display: flex; flex-flow: <?php if(wp_is_mobile()) echo 'column';else echo 'row';?>; font-size: 12px; margin-top: 10px">
+                                                                    تست شماره <?php echo esc_html($source['question_sources_llatt']);?> آزمون شماره <?php echo esc_html($source['exam_id_sources_llatt']);?><div style="display: flex; flex-flow: row wrap; padding-right: 3px">
+                                                                        <?php if(!wp_is_mobile()) {echo " - رشته ";} else{ echo "رشته ";}?>
+                                                                        <?php
                                                                         echo " ";
                                                                         if ($source['major_sources_llatt'] == 'تجربی') {
                                                                             echo '<div style="color: #FFC965; padding-right: 3px"> تجربی</div>';
@@ -831,30 +835,30 @@ function lessons_learnt_after_test_func_llatt() {
                                                                 </div>
 
                                                                 <div class="source-links">
-                                                                <?php if (!empty($source['voice_sources_llatt'])) : ?>
-                                                                    <a href="<?php echo esc_url($source['voice_sources_llatt']); ?>" target="_blank" class="source-link voice-link">
-                                                                        <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import.svg" alt="Video Icon" class="source-icon-img">
-                                                                        <span class="source-text">voice</span>
-                                                                    </a>
-                                                                <?php endif; ?>
-                                                                <?php if (!empty($source['video_sources_aparat_llatt']) || !empty($source['video_sources_name_llatt'])) : ?>
-                                                                    <a href="javascript:void(0)"
-                                                                       class="source-link video-link send-video-data"
-                                                                       data-aparat="<?php echo esc_attr($source['video_sources_aparat_llatt']); ?>"
-                                                                       data-name="<?php echo esc_attr($source['video_sources_name_llatt']); ?>"
-                                                                       data-id="<?php echo esc_attr($source['video_sources_id_llatt']); ?>">
-                                                                        <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-1.svg" alt="Video Icon" class="source-icon-img">
-                                                                        <span class="source-text">video</span>
-                                                                    </a>
-                                                                <?php endif; ?>
+                                                                    <?php if (!empty($source['voice_sources_llatt'])) : ?>
+                                                                        <a href="<?php echo esc_url($source['voice_sources_llatt']); ?>" target="_blank" class="source-link voice-link">
+                                                                            <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import.svg" alt="Video Icon" class="source-icon-img">
+                                                                            <span class="source-text">voice</span>
+                                                                        </a>
+                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($source['video_sources_aparat_llatt']) || !empty($source['video_sources_name_llatt'])) : ?>
+                                                                        <a href="javascript:void(0)"
+                                                                           class="source-link video-link send-video-data"
+                                                                           data-aparat="<?php echo esc_attr($source['video_sources_aparat_llatt']); ?>"
+                                                                           data-name="<?php echo esc_attr($source['video_sources_name_llatt']); ?>"
+                                                                           data-id="<?php echo esc_attr($source['video_sources_id_llatt']); ?>">
+                                                                            <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-1.svg" alt="Video Icon" class="source-icon-img">
+                                                                            <span class="source-text">video</span>
+                                                                        </a>
+                                                                    <?php endif; ?>
 
-                                                                <?php if (!empty($source['doc_sources_llatt'])) : ?>
-                                                                    <a href="<?php echo esc_url($source['doc_sources_llatt']); ?>" target="_blank" class="source-link pdf-link">
-                                                                        <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-2.svg" alt="Video Icon" class="source-icon-img">
-                                                                        <span class="source-text">PDF</span>
-                                                                    </a>
-                                                                <?php endif; ?>
-                                                            </div>
+                                                                    <?php if (!empty($source['doc_sources_llatt'])) : ?>
+                                                                        <a href="<?php echo esc_url($source['doc_sources_llatt']); ?>" target="_blank" class="source-link pdf-link">
+                                                                            <img src="https://azmoon.tamland.ir/wp-content/uploads/2025/09/import-2.svg" alt="Video Icon" class="source-icon-img">
+                                                                            <span class="source-text">PDF</span>
+                                                                        </a>
+                                                                    <?php endif; ?>
+                                                                </div>
                                                         </li>
                                                         <?php
                                                     }
@@ -899,7 +903,8 @@ function get_dynamic_classes() {
     // Map for azmoon-tags taxonomy
     $azmoon_map = array(
         67 => 'az-tag-konkoor',
-        68 => 'az-tag-mid2',
+        73 => 'az-tag-c10',
+        74 => 'az-tag-c11',
         71 => 'az-tag-tiz6',
         72 => 'az-tag-tiz9',
     );
@@ -957,7 +962,6 @@ function get_static_token($video_name, $video_id) {
     return $response;
 }
 
-// شورتکد برای مدال ویدیو (مدال فقط یک بار ساخته می‌شود)
 function videoPlayerPopUp_func() {
     ob_start();
     ?>
@@ -1078,3 +1082,37 @@ function ajax_get_video_token() {
     echo get_static_token($video_name, $video_id);
     wp_die();
 }
+
+function check_exam_cards_fields() {
+    $post_id = get_the_ID();
+    if ( !$post_id ) return 0;
+
+    // فهرست دقیق اسلاگ‌های فیلدها (طبق تصویر)
+    $fields = [
+        'rizai-card-link',
+        'tajrobi-card-link',
+        'ensani-card-link',
+        'zaban-card-link',
+        'honar-card-link',
+        'tiz6-card-link',
+        'tiz9-card-link',
+    ];
+
+    $has_any = false;
+
+    foreach ( $fields as $field_key ) {
+        $value = get_post_meta( $post_id, $field_key, true );
+        if ( !empty( $value ) ) {
+            $has_any = true;
+            break;
+        }
+    }
+
+    // اگر همه خالی بودن 0 برگردون، در غیر این صورت 1
+    return $has_any ? 1 : 0;
+}
+
+// شورتکد برای استفاده در المنتور یا محتوا
+add_shortcode('cards_check', function() {
+    return check_exam_cards_fields();
+});
